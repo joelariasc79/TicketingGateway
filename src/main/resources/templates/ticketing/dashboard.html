@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ticketing System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Ticketing System</h1>
+        <h2 th:text="'Welcome ' + ${principal.getUsername()}" class="alert alert-success">Welcome User</h2>
+        <!-- <h3 th:text="'Welcome ' + ${principal.getUserId()}"></h3> -->
+
+        <div th:if="${#lists.contains(userRoles, 'ADMIN')}" class="card mb-3">
+            <div class="card-header">Admin Module</div>
+            <div class="card-body">
+                <a href="/admin/users" class="btn btn-primary mr-2">Admin Users</a>
+                <button class="btn btn-secondary">Tickets List</button>
+            </div>
+        </div>
+
+        <div th:if="${#lists.contains(userRoles, 'MANAGER')}" class="card mb-3">
+            <div class="card-header">Manager Module</div>
+            <div class="card-body">
+                <button class="btn btn-warning">Approve Tickets</button>
+            </div>
+        </div>
+
+        <div th:if="${#lists.contains(userRoles, 'USER')}" class="card mb-3">
+            <div class="card-header">User Tickets</div>
+            <div class="card-body">
+                 <a th:href="@{/ticketing/userTickets/{userId}(userId=${userId})}" class="btn btn-secondary">Add/Manage Tickets</a>
+                 
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
