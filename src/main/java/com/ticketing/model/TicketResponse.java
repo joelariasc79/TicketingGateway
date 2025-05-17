@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 public class TicketResponse {
-    private Long id;
+    private Long ticketId;
     private String title;
     private String description;
     private UserResponse createdBy;
@@ -13,16 +13,17 @@ public class TicketResponse {
     private String status;
     private Date creationDate;
     private String category;
-    private String fileAttachmentPath;
+    //  private String fileAttachmentPath;  // Removed fileAttachmentPath
     private List<TicketHistoryResponse> history;
+    private List<AttachmentResponse> attachments; // Added attachments
 
     // Default constructor
     public TicketResponse() {
     }
 
     // Constructor with fields
-    public TicketResponse(Long id, String title, String description, UserResponse createdBy, UserResponse assignee, String priority, String status, Date creationDate, String category, String fileAttachmentPath, List<TicketHistoryResponse> history) {
-        this.id = id;
+    public TicketResponse(Long ticketId, String title, String description, UserResponse createdBy, UserResponse assignee, String priority, String status, Date creationDate, String category, List<TicketHistoryResponse> history, List<AttachmentResponse> attachments) { //modified constructor
+        this.ticketId = ticketId;
         this.title = title;
         this.description = description;
         this.createdBy = createdBy;
@@ -31,13 +32,13 @@ public class TicketResponse {
         this.status = status;
         this.creationDate = creationDate;
         this.category = category;
-        this.fileAttachmentPath = fileAttachmentPath;
         this.history = history;
+        this.attachments = attachments; //added attachments to constructor
     }
 
     // Getters
-    public Long getId() {
-        return id;
+    public Long getTicketId() {
+        return ticketId;
     }
 
     public String getTitle() {
@@ -72,17 +73,21 @@ public class TicketResponse {
         return category;
     }
 
-    public String getFileAttachmentPath() {
-        return fileAttachmentPath;
-    }
+    // public String getFileAttachmentPath() {  // Removed getter
+    //      return fileAttachmentPath;
+    // }
 
     public List<TicketHistoryResponse> getHistory() {
         return history;
     }
 
+    public List<AttachmentResponse> getAttachments() {
+        return attachments;
+    }
+
     // Setters
-    public void setId(Long id) {
-        this.id = id;
+    public void setTicketId(Long ticketId) {
+        this.ticketId = ticketId;
     }
 
     public void setTitle(String title) {
@@ -117,18 +122,22 @@ public class TicketResponse {
         this.category = category;
     }
 
-    public void setFileAttachmentPath(String fileAttachmentPath) {
-        this.fileAttachmentPath = fileAttachmentPath;
-    }
+    // public void setFileAttachmentPath(String fileAttachmentPath) {  // Removed setter
+    //      this.fileAttachmentPath = fileAttachmentPath;
+    // }
 
     public void setHistory(List<TicketHistoryResponse> history) {
         this.history = history;
     }
 
+    public void setAttachments(List<AttachmentResponse> attachments) {
+        this.attachments = attachments;
+    }
+
     @Override
     public String toString() {
         return "TicketResponse{" +
-                "id=" + id +
+                "ticketId=" + ticketId +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", createdBy=" + createdBy +
@@ -137,8 +146,9 @@ public class TicketResponse {
                 ", status='" + status + '\'' +
                 ", creationDate=" + creationDate +
                 ", category='" + category + '\'' +
-                ", fileAttachmentPath='" + fileAttachmentPath + '\'' +
+                //  ", fileAttachmentPath='" + fileAttachmentPath + '\'' +  // Removed
                 ", history=" + history +
+                ", attachments=" + attachments +
                 '}';
     }
 }

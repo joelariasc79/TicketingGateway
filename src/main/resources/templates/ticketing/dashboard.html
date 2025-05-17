@@ -11,7 +11,8 @@
     <div class="container mt-4">
         <h1>Ticketing System</h1>
         <h2 th:text="'Welcome ' + ${principal.getUsername()}" class="alert alert-success">Welcome User</h2>
-        <!-- <h3 th:text="'Welcome ' + ${principal.getUserId()}"></h3> -->
+        <p><b>User ID: </b><span th:text="${userId}"></span></p>
+        
 
         <div th:if="${#lists.contains(userRoles, 'ADMIN')}" class="card mb-3">
             <div class="card-header">Admin Module</div>
@@ -31,9 +32,13 @@
         <div th:if="${#lists.contains(userRoles, 'USER')}" class="card mb-3">
             <div class="card-header">User Tickets</div>
             <div class="card-body">
-                 <a th:href="@{/ticketing/userTickets/{userId}(userId=${userId})}" class="btn btn-secondary">Add/Manage Tickets</a>
+                 <a th:href="@{/ticketing/userTicketsList/{userId}(userId=${userId})}" class="btn btn-secondary">Add/Manage Tickets</a>
                  
             </div>
+        </div>
+        
+        <div>
+        	<p><a href="/login" class="btn btn-secondary">Go Back</a></p>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -162,50 +162,51 @@ public class ExternalServiceClient {
  }
  
  
-// public UserResponse fethcUser(HttpClient client, String url, Long userId) {    	
-//     UserResponse users = new UserResponse();
-//    
-//     HttpHeaders headers = new HttpHeaders();
-//     HttpEntity<Void> requestEntity = new HttpEntity<>(headers); // No body for GET
-//
-//
-//      try {
-//    	  ResponseEntity<UserResponse> responseEntity = restTemplate.exchange(
-//    			    url + "{userId}", // Append query parameters to the URL
-//    			    HttpMethod.GET,
-//    			    requestEntity,
-//    			    new ParameterizedTypeReference<UserResponse>() {}
-//    			);
-//
-//	         
-//	         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-//	        	 users = responseEntity.getBody();
-//	             // Process the list of users
-//	             System.out.println("Users: " + users);
-//	         } else {
-//	             System.err.println("GET Request failed with status code: " + responseEntity.getStatusCode());
-//	         }
-//      } catch (HttpClientErrorException e) {
-//     	    System.err.println("Client error during GET request. Status Code: " + e.getStatusCode());
-//     	    System.err.println("Response Body: " + e.getResponseBodyAsString());
-//     	    // Handle specific client errors (4xx)
-//     	    if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-//     	        System.err.println("Resource not found at: " + url);
-//     	    } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-//     	        System.err.println("Unauthorized access to: " + url);
-//     	    }
-//     	    // Add more specific error handling based on status codes
-//     	} catch (RestClientException e) {
-//     	    System.err.println("Error during GET request: " + e.getMessage());
-//     	    // Handle other RestTemplate related exceptions (e.g., connection issues)
-//     	} catch (Exception e) {
-//     	    System.err.println("An unexpected error occurred during the GET request: " + e.getMessage());
-//     	    // Handle any other unexpected exceptions
-//     	}
-//         
-//
-//     return users;
-// }
+ public UserResponse fethcUserByUserName(HttpClient client, String url, String userName) {    	
+     UserResponse user = new UserResponse();
+    
+     HttpHeaders headers = new HttpHeaders();
+     HttpEntity<Void> requestEntity = new HttpEntity<>(headers); // No body for GET
+
+
+      try {
+    	  ResponseEntity<UserResponse> responseEntity = restTemplate.exchange(
+    			    url + "{userName}", // Append query parameters to the URL
+    			    HttpMethod.GET,
+    			    requestEntity,
+    			    new ParameterizedTypeReference<UserResponse>() {},
+    			    userName
+    			);
+
+	         
+	         if (responseEntity.getStatusCode().is2xxSuccessful()) {
+	        	 user = responseEntity.getBody();
+	             // Process the list of users
+	             System.out.println("Users: " + user);
+	         } else {
+	             System.err.println("GET Request failed with status code: " + responseEntity.getStatusCode());
+	         }
+      } catch (HttpClientErrorException e) {
+     	    System.err.println("Client error during GET request. Status Code: " + e.getStatusCode());
+     	    System.err.println("Response Body: " + e.getResponseBodyAsString());
+     	    // Handle specific client errors (4xx)
+     	    if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+     	        System.err.println("Resource not found at: " + url);
+     	    } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+     	        System.err.println("Unauthorized access to: " + url);
+     	    }
+     	    // Add more specific error handling based on status codes
+     	} catch (RestClientException e) {
+     	    System.err.println("Error during GET request: " + e.getMessage());
+     	    // Handle other RestTemplate related exceptions (e.g., connection issues)
+     	} catch (Exception e) {
+     	    System.err.println("An unexpected error occurred during the GET request: " + e.getMessage());
+     	    // Handle any other unexpected exceptions
+     	}
+         
+
+     return user;
+ }
  
 
 }

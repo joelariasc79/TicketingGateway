@@ -10,7 +10,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails; // Import UserDetails
 
 import com.ticketing.client.ExternalServiceClient;
+import com.ticketing.model.DepartmentResponse;
+import com.ticketing.model.UserResponse;
 
+import java.net.http.HttpClient;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +22,8 @@ import java.util.stream.Collectors;
 @SessionAttributes("user")
 public class DashboardController {
 
-    private final String ticketingAdminAPIurl = "http://localhost:8282/";
-    private final String ticketingAdminDepartmentsAPIurl = ticketingAdminAPIurl + "api/admin/departments/";
+    private final String ticketingAdminAPIEndPointurl = "http://localhost:8282/";
+    private final String ticketingAdminAPIurl = ticketingAdminAPIEndPointurl + "api/admin/users/";
 
     private final ExternalServiceClient externalServiceClient; // Inject the service
 
@@ -31,21 +34,42 @@ public class DashboardController {
     // Get UserId from Admin Endpoint
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
+    	final String ticketingAdminUserNameAPIurl = ticketingAdminAPIurl + "userName/";
+    	
+    	System.out.println("ticketingAdminUserNameAPIurl: " + ticketingAdminUserNameAPIurl);
+    	
         if (authentication != null && authentication.isAuthenticated()) {
             List<String> roles = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
             model.addAttribute("userRoles", roles);
 
-            // Explicitly add the principal to the model
+            Long userId = null;
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                model.addAttribute("principal", userDetails);
+                
+                HttpClient client = HttpClient.newHttpClient();
+                
+                // Fetch User
+//                System.out.println("userDetails.getUsername(): " + userDetails.getUsername());
+                UserResponse user = externalServiceClient.fethcUserByUserName(client, ticketingAdminUserNameAPIurl, userDetails.getUsername());
+                userId = user.getUserId();
+                System.out.println("userId: " + userId);
+                model.addAttribute("userId", userId);
+                
+                //  Get the userId using the userService
+//                userId = userService.getUserIdByUsername(userDetails.getUsername());
+//                model.addAttribute("userId", userId);
+                model.addAttribute("principal", userDetails); //Also send userDetails
             } else {
                 // Handle cases where the principal might be a different type
                 model.addAttribute("principal", authentication.getPrincipal());
+                //  You might want to log this or handle it in a way that makes sense for your application.
+                //  For example, you might set userId to a default value or show an error.
+                userId = 0L;  // Or some default value
+                model.addAttribute("userId", userId);
             }
-
+            model.addAttribute("userId", userId); //redundant
         } else {
             return "login";
         }

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${formHeading}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #343a40;
+        }
+        .card-header {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #e2e3e4;
+            border-color: #e2e3e4;
+            color: #383d41;
+        }
+        .btn-secondary:hover {
+            background-color: #c8cbcf;
+            border-color: #c8cbcf;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        .invalid-feedback {
+            color: #dc3545;
+        }
+        .form-check-label {
+            margin-left: 0.5rem; /* Add some space between checkbox and label */
+        }
+        .attachment-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .attachment-list-item:last-child {
+            border-bottom: none;
+        }
+        .delete-attachment-btn {
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header">
+                        <h3 class="card-title" th:text="${userFormTitle}"></h3>
+                        <p><b>User ID: </b><span th:text="${userId}"></span></p>
+                        <p><b>Ticket ID: </b><span th:text="${ticketId}"></span></p>
+                    </div>
+                    <div class="card-body">
+                        <form id="ticketForm" method="post" enctype="multipart/form-data">
+                            <input type="hidden" id="ticketId" name="ticketId" th:value="${ticket?.ticketId}" />
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" name="title" th:value="${ticket?.title}" required>
+                                <div class="invalid-feedback" id="title-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required th:text="${ticket?.description}"></textarea>
+                                <div class="invalid-feedback" id="description-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">Priority <span class="text-danger">*</span></label>
+                                <select class="form-select" id="priority" name="priority" required>
+                                    <option value="" disabled selected>Select Priority</option>
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HIGH">High</option>
+                                </select>
+                                <div class="invalid-feedback" id="priority-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="category" name="category" required th:value="${ticket?.category}">
+                                <div class="invalid-feedback" id="category-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="comments" class="form-label">Comments</label>
+                                <textarea class="form-control" id="comments" name="comments" rows="3" th:text="${ticket?.comments}"></textarea>
+                                <div class="invalid-feedback" id="comments-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileAttachmentPath" class="form-label">File Attachment</label>
+                                <input type="file" class="form-control" id="fileAttachmentPath" name="files" multiple>
+                                <div class="invalid-feedback" id="fileAttachmentPath-error"></div>
+                                <small class="text-muted">Optional: You can upload multiple files.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Selected Files:</label>
+                                <ul id="selectedFilesList" class="list-unstyled">
+                                    </ul>
+                            </div>
+                            <div id="existingAttachmentsContainer" th:if="${ticket?.ticketId != null}">
+                                <label class="form-label">Attachments:</label>
+                                <ul id="existingAttachmentsList" class="list-unstyled">
+                                    </ul>
+                            </div>
+                            <button type="submit" class="btn btn-primary me-2" th:text="${ticketId == null ? 'Create Ticket' : 'Update Ticket'}"></button>
+                            <button type="reset" class="btn btn-secondary">Clear</button>
+        					<a th:href="@{/ticketing/userTicketsList/{userId}(userId=${userId})}" class="btn btn-secondary">Go Back</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script th:inline="javascript">
+$(document).ready(function() {
+    let userId = /*[[${userId}]]*/ null;
+    let ticketId = /*[[${ticketId}]]*/ null;
+    
+    console.log("ticketId: " + ticketId);
+
+    // Function to update the displayed file list before upload
+    $('#fileAttachmentPath').change(function() {
+        const files = this.files;
+        const selectedFilesList = $('#selectedFilesList');
+        selectedFilesList.empty(); // Clear previous list
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const listItem = $('<li></li>').text(file.name);
+            selectedFilesList.append(listItem);
+        }
+    });
+
+    $('#ticketForm').submit(function(e) {
+        e.preventDefault();
+        let url = 'http://localhost:8383';
+
+        $('.is-invalid').removeClass('is-invalid');
+        $('.invalid-feedback').text('');
+
+        let formData = new FormData(this);
+
+        url = ticketId ? url + '/api/tickets/users/update/' + userId + '/' + ticketId : url + '/api/tickets/users/create/' + userId;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message, 'Success');
+                    $('#ticketForm')[0].reset();
+                    window.location.href = '/ticketing/userTicketsList/' + userId;
+                } else {
+                    $.each(response.errors, function(key, value) {
+                        $('#' + key).addClass('is-invalid');
+                        $('#' + key + '-error').text(value);
+                    });
+                    toastr.error('Please fix the errors in the form.', 'Error');
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error('An error occurred: ' + error, 'Error');
+            }
+        });
+    });
+
+    function loadTicketDetails(ticketId) {
+        let url = 'http://localhost:8383/api/tickets/users/ticket/' + ticketId;
+        if (ticketId) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    if (response) { // Changed from response.success && response.data
+                        const ticket = response; // Direct assignment
+
+                        $('#title').val(ticket.title);
+                        $('#description').val(ticket.description);
+                        $('#priority').val(ticket.priority);
+                        $('#category').val(ticket.category);
+                        $('#comments').val(ticket.comments);
+                        
+                        //set priority dropdown
+                        if(ticket.priority){
+                           $('#priority').val(ticket.priority);
+                        }
+
+
+                        // Load existing attachments
+                        if (ticket.attachments && ticket.attachments.length > 0) {
+                            const existingAttachmentsList = $('#existingAttachmentsList');
+                            existingAttachmentsList.empty();
+                            ticket.attachments.forEach(attachment => {
+                                const listItem = $('<li class="attachment-list-item"></li>').text(attachment.fileName);
+                                const deleteButton = $('<button type="button" class="btn btn-danger btn-sm delete-attachment-btn"></button>')
+                                    .text('Delete')
+                                    .data('attachment-id', attachment.attachmentId);
+                                listItem.append(deleteButton);
+                                existingAttachmentsList.append(listItem);
+                            });
+                        }
+                    } else if (response.message) { // Removed: else if (response.message)
+                        toastr.error("error", 'Error loading ticket'); //simplified error message
+                    } else {
+                        toastr.error('Failed to load ticket details.', 'Error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error loading ticket details: ' + error, 'Error');
+                }
+            });
+        }
+    }
+
+    // Load ticket details if it's an update
+    if (ticketId) {
+        loadTicketDetails(ticketId);
+    }
+
+    // Handle deletion of existing attachments
+    $(document).on('click', '.delete-attachment-btn', function() {
+        const attachmentId = $(this).data('attachment-id');
+        const listItemToRemove = $(this).closest('.attachment-list-item');
+
+        if (confirm('Are you sure you want to delete this attachment?')) {
+            $.ajax({
+                url: `/api/attachments/${attachmentId}`, //check this
+                type: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('Attachment deleted successfully', 'Success');
+                        listItemToRemove.remove();
+                    } else {
+                        toastr.error(response.message, 'Error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error deleting attachment: ' + error, 'Error');
+                }
+            });
+        }
+    });
+});
+</script>
+</body>
+</html>
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${formHeading}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #343a40;
+        }
+        .card-header {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #e2e3e4;
+            border-color: #e2e3e4;
+            color: #383d41;
+        }
+        .btn-secondary:hover {
+            background-color: #c8cbcf;
+            border-color: #c8cbcf;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        .invalid-feedback {
+            color: #dc3545;
+        }
+        .form-check-label {
+            margin-left: 0.5rem; /* Add some space between checkbox and label */
+        }
+        .attachment-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .attachment-list-item:last-child {
+            border-bottom: none;
+        }
+        .delete-attachment-btn {
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header">
+                        <h3 class="card-title" th:text="${userFormTitle}"></h3>
+                        <p><b>User ID: </b><span th:text="${userId}"></span></p>
+                        <p><b>Ticket ID: </b><span th:text="${ticketId}"></span></p>
+                    </div>
+                    <div class="card-body">
+                        <form id="ticketForm" method="post" enctype="multipart/form-data">
+                            <input type="hidden" id="ticketId" name="ticketId" th:value="${ticket?.ticketId}" />
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" name="title" th:value="${ticket?.title}" required>
+                                <div class="invalid-feedback" id="title-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required th:text="${ticket?.description}"></textarea>
+                                <div class="invalid-feedback" id="description-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">Priority <span class="text-danger">*</span></label>
+                                <select class="form-select" id="priority" name="priority" required>
+                                    <option value="" disabled selected>Select Priority</option>
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HIGH">High</option>
+                                </select>
+                                <div class="invalid-feedback" id="priority-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="category" name="category" required>
+                                <div class="invalid-feedback" id="category-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="comments" class="form-label">Comments</label>
+                                <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+                                <div class="invalid-feedback" id="comments-error"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileAttachmentPath" class="form-label">File Attachment</label>
+                                <input type="file" class="form-control" id="fileAttachmentPath" name="files" multiple>
+                                <div class="invalid-feedback" id="fileAttachmentPath-error"></div>
+                                <small class="text-muted">Optional: You can upload multiple files.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Selected Files:</label>
+                                <ul id="selectedFilesList" class="list-unstyled">
+                                    </ul>
+                            </div>
+                            <div id="existingAttachmentsContainer" th:if="${ticket?.ticketId != null}">
+                                <label class="form-label">Attachments:</label>
+                                <ul id="existingAttachmentsList" class="list-unstyled">
+                                    </ul>
+                            </div>
+                            <button type="submit" class="btn btn-primary me-2" th:text="${ticket?.ticketId == null ? 'Create Ticket' : 'Update Ticket'}"></button>
+                            <button type="reset" class="btn btn-secondary">Clear</button>
+        					<a th:href="@{/ticketing/userTicketsList/{userId}(userId=${userId})}" class="btn btn-secondary">Go Back</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script th:inline="javascript">
+$(document).ready(function() {
+    let userId = /*[[${userId}]]*/ null;
+    let ticketId = /*[[${ticketId}]]*/ null;
+    
+    console.log("ticketId: " + ticketId);
+
+    // Function to update the displayed file list before upload
+    $('#fileAttachmentPath').change(function() {
+        const files = this.files;
+        const selectedFilesList = $('#selectedFilesList');
+        selectedFilesList.empty(); // Clear previous list
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const listItem = $('<li></li>').text(file.name);
+            selectedFilesList.append(listItem);
+        }
+    });
+
+    $('#ticketForm').submit(function(e) {
+        e.preventDefault();
+        let url = 'http://localhost:8383';
+
+        $('.is-invalid').removeClass('is-invalid');
+        $('.invalid-feedback').text('');
+
+        let formData = new FormData(this);
+
+        url = ticketId ? url + '/api/tickets/users/update/' + userId + '/' + ticketId : url + '/api/tickets/users/create/' + userId;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message, 'Success');
+                    $('#ticketForm')[0].reset();
+                    window.location.href = '/ticketing/userTicketsList/' + userId;
+                } else {
+                    $.each(response.errors, function(key, value) {
+                        $('#' + key).addClass('is-invalid');
+                        $('#' + key + '-error').text(value);
+                    });
+                    toastr.error('Please fix the errors in the form.', 'Error');
+                }
+            },
+            error: function(xhr, status, error) {
+                toastr.error('An error occurred: ' + error, 'Error');
+            }
+        });
+    });
+
+    function loadTicketDetails(ticketId) {
+    	let url = 'http://localhost:8383/api/tickets/users/ticket/' + ticketId;
+        if (ticketId) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    if (response.success && response.data) {
+                    	console.log("hola");
+                        const ticket = response.data;
+                        /* $('#title').val(ticket.title);
+                        $('#description').val(ticket.description);
+                        $('#priority').val(ticket.priority);
+                        $('#category').val(ticket.category); */
+                        /* $('#comments').val(ticket.comments); */
+                        
+                        /* console.log("ticket.title: " + ticket.title); */
+
+                        // Load existing attachments
+                        /* if (ticket.attachments && ticket.attachments.length > 0) {
+                            const existingAttachmentsList = $('#existingAttachmentsList');
+                            existingAttachmentsList.empty();
+                            ticket.attachments.forEach(attachment => {
+                                const listItem = $('<li class="attachment-list-item"></li>').text(attachment.fileName);
+                                const deleteButton = $('<button type="button" class="btn btn-danger btn-sm delete-attachment-btn"></button>')
+                                    .text('Delete')
+                                    .data('attachment-id', attachment.attachmentId);
+                                listItem.append(deleteButton);
+                                existingAttachmentsList.append(listItem);
+                            });
+                        } */
+                    } else if (response.message) {
+                        toastr.error(response.message, 'Error loading ticket');
+                    } else {
+                    	console.log("hola2");
+                        toastr.error('Failed to load ticket details.', 'Error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error loading ticket details: ' + error, 'Error');
+                }
+            });
+        }
+    }
+
+    // Load ticket details if it's an update
+    if (ticketId) {
+        loadTicketDetails(ticketId);
+    }
+
+    // Handle deletion of existing attachments
+    $(document).on('click', '.delete-attachment-btn', function() {
+        const attachmentId = $(this).data('attachment-id');
+        const listItemToRemove = $(this).closest('.attachment-list-item');
+
+        if (confirm('Are you sure you want to delete this attachment?')) {
+            $.ajax({
+                url: `/api/attachments/${attachmentId}`,
+                type: 'DELETE',
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success('Attachment deleted successfully', 'Success');
+                        listItemToRemove.remove();
+                    } else {
+                        toastr.error(response.message, 'Error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error deleting attachment: ' + error, 'Error');
+                }
+            });
+        }
+    });
+});
+</script>
+</body>
+</html> -->

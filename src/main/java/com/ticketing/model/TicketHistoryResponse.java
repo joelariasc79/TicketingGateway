@@ -3,7 +3,7 @@ package com.ticketing.model;
 import java.util.Date;
 
 public class TicketHistoryResponse {
-    private Long id;
+    private Long ticketHistoryId;
     private String action;
     private UserResponse actionBy; // Changed to UserResponse
     private Date actionDate;
@@ -14,8 +14,8 @@ public class TicketHistoryResponse {
     }
 
     // Constructor with fields
-    public TicketHistoryResponse(Long id, String action, UserResponse actionBy, Date actionDate, String comments) {
-        this.id = id;
+    public TicketHistoryResponse(Long ticketHistoryId, String action, UserResponse actionBy, Date actionDate, String comments) {
+        this.ticketHistoryId = ticketHistoryId;
         this.action = action;
         this.actionBy = actionBy;
         this.actionDate = actionDate;
@@ -23,8 +23,8 @@ public class TicketHistoryResponse {
     }
 
     // Getters
-    public Long getId() {
-        return id;
+    public Long getTicketHistoryId() {
+        return ticketHistoryId;
     }
 
     public String getAction() {
@@ -44,8 +44,8 @@ public class TicketHistoryResponse {
     }
 
     // Setters
-    public void setId(Long id) {
-        this.id = id;
+    public void setTicketHistoryId(Long ticketHistoryId) {
+        this.ticketHistoryId = ticketHistoryId;
     }
 
     public void setAction(String action) {
@@ -67,7 +67,7 @@ public class TicketHistoryResponse {
     @Override
     public String toString() {
         return "TicketHistoryResponse{" +
-                "id=" + id +
+                "ticketHistoryId=" + ticketHistoryId +
                 ", action='" + action + '\'' +
                 ", actionBy=" + actionBy +
                 ", actionDate=" + actionDate +
