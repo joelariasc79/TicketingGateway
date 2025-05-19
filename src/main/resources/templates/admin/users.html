@@ -19,7 +19,7 @@
     <div class="container mt-5">
         <h1 th:text="${formHeading}" class="mb-4"></h1>
         <p><a href="/admin/users/create" class="btn btn-success">Create New User</a></p>
-        <p><a href="/ticketing/dashboard" class="btn btn-secondary">Go Back</a></p>
+        <p><a href="/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p>
 
         <div id="message-container">
             <div th:if="${message}" class="alert alert-info" th:text="${message}"></div>

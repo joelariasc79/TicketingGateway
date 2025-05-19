@@ -1,4 +1,6 @@
 package com.ticketing.controller;
+import java.net.http.HttpClient;
+import java.security.Principal;
 import java.util.ArrayList;
 //
 //import java.security.Principal;
@@ -30,16 +32,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.client.RestTemplate;
 
 import com.ticketing.domain.Department;
 import com.ticketing.domain.Project;
 import com.ticketing.domain.Role;
 import com.ticketing.domain.User;
 import com.ticketing.dto.NewUserDTO;
+import com.ticketing.model.DepartmentResponse;
+import com.ticketing.model.ProjectResponse;
+import com.ticketing.model.RoleResponse;
+import com.ticketing.model.UserResponse;
 import com.ticketing.service.DepartmentService;
 import com.ticketing.service.ProjectService;
 import com.ticketing.service.RoleService;
 import com.ticketing.service.UserService;
+import com.ticketing.client.ExternalServiceClient;
 //
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -62,10 +70,19 @@ public class UserController {
     
     @Autowired
     private ProjectService projectService;
+    
+    @Autowired
+    private RestTemplate restTemplate;
+    
+
+    private final ExternalServiceClient externalServiceClient; // Inject the service
+    
+    private final String userAdminBaseUrl = "http://localhost:8282"; // Define base URL
 
 
-    UserController(SecurityFilterChain apiFilterChain2) {
+    UserController(SecurityFilterChain apiFilterChain2, ExternalServiceClient externalServiceClient) {
         this.apiFilterChain2 = apiFilterChain2;
+        this.externalServiceClient = externalServiceClient;
     }
    
     
@@ -85,6 +102,47 @@ public class UserController {
      List<User> users = userService.findAll();
      return ResponseEntity.ok(users);
     }
+    
+    @GetMapping("/dashboard")
+    public String showDashboard(Model model, Principal principal) { 	
+        if (principal != null) {
+            String username = principal.getName();
+            String userServiceUrl = userAdminBaseUrl + "/api/admin/users/userName/";
+            
+            HttpClient client = HttpClient.newHttpClient();
+        	UserResponse user = externalServiceClient.fethcUserByUserName(client, userServiceUrl, username);
+        	
+        	if (user != null) {
+	        	System.out.println("principal 1: " + principal);
+	        	System.out.println("userId 1: " + user.getUserId());
+	        	System.out.println("user: " + user);
+	        	
+	        	String roleServiceUrl = userAdminBaseUrl + "/api/admin/roles/";
+	            
+	        	List<RoleResponse> userRoles = externalServiceClient.fethcRolesByUser(client, roleServiceUrl, user.getUserId());
+	        	
+	        	
+	        	System.out.println("userRoles: " + userRoles);
+	            
+	            model.addAttribute("principal", principal);
+	        	model.addAttribute("userId", user.getUserId());
+	        	model.addAttribute("userRoles", userRoles);
+	        	
+	        	return "ticketing/dashboard";
+        	
+        	} else {
+                // Handle the case where the UserService returns an error
+                System.err.println("Error fetching user from UserService");
+                // Optionally add an error message to the model to display to the user
+                model.addAttribute("errorMessage", "Error fetching user details.");
+                return "error"; // Or redirect to an error page
+            }
+        	
+        }
+        return "login";
+    }
+
+   
     
     @GetMapping("/test")
     public String test(Model model) {

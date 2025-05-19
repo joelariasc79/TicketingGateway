@@ -32,5 +32,12 @@ public class TicketsController {
         model.addAttribute("ticketId", ticketId);
         return "ticketing/userTicket"; // Returns the same Thymeleaf template for create
     }
+    
+    
+    @GetMapping("/managerTicketsList/{userId}")
+    public String getManagerTickets(@PathVariable Long userId, Model model) {
+        model.addAttribute("userId", userId);
+        return "ticketing/managerTicketsList"; //  Return the name of your Thymeleaf template.
+    }
 }
 

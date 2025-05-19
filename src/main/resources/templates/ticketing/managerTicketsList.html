@@ -31,41 +31,20 @@
                 <tr>
                     <th>Title</th>
                     <th>Description</th>
-                    <th>Assignee</th>
                     <th>Priority</th>
-                    <th>Status</th>
                     <th>Edit</th>
-                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td colspan="7" class="text-center">Loading tickets...</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <a th:href="@{/ticketing/users/create/{userId}(userId=${userId})}" class="btn btn-success">Create New Ticket</a>
-
-        <h2 class="mt-5">Closed Tickets</h2>
-        <table class="table table-striped table-bordered" id="closedTicketTable">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Closed By</th>
-                </tr>
-            </thead>
-            <tbody>
-                 <tr>
-                    <td colspan="4" class="text-center">Loading closed tickets...</td>
+                    <td colspan="5" class="text-center">Loading tickets...</td>
                 </tr>
             </tbody>
         </table>
 
         <div>
             <p><a href="/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p>
+            
         </div>
 
         <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
@@ -93,8 +72,10 @@
     <script th:inline="javascript">
         $(document).ready(function() {
         	let userId = /*[[${userId}]]*/ null;
-            var ticketApiUrl = "http://localhost:8383/api/tickets/users/" + userId + "/ticketList";
-
+            var ticketApiUrl = "http://localhost:8383/api/tickets/managers/" + userId + "/managedTickets";
+            
+            console.log("userId: " + userId);
+           
             function loadTickets() {
                 $.ajax({
                     url: ticketApiUrl,
@@ -102,41 +83,66 @@
                     dataType: "json",
                     success: function(data) {
                         var ticketTableBody = $("#ticketTable tbody");
-                        ticketTableBody.empty(); // Clear the "Loading..." message
+                        ticketTableBody.empty();
                         if (data && data.length > 0) {
                             $.each(data, function(index, ticket) {
-                                var assigneeName = ticket.assignee ? ticket.assignee.userName : 'Unassigned';
                                 var row = '<tr>' +
                                     '<td>' + ticket.title + '</td>' +
                                     '<td>' + ticket.description + '</td>' +
-                                    '<td>' + assigneeName + '</td>' +
                                     '<td>' + ticket.priority + '</td>' +
-                                    '<td>' + ticket.status + '</td>' +
-                                    '<td><a href="/ticketing/users/update/' + userId + '/' + ticket.ticketId + '" class="btn btn-primary btn-sm">Edit</a></td>' +
-                                    '<td><button type="button" class="btn btn-danger btn-sm delete-button" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" data-ticket-id="' + ticket.ticketId + '" data-ticket-title="' + ticket.title + '">Delete</button></td>' +
+                                    '<td><a href="/admin/managers/update/' + userId + '/' + ticket.ticketId + '" class="btn btn-primary btn-sm">Edit</a></td>' +
                                     '</tr>';
                                 ticketTableBody.append(row);
                             });
-                            initDeleteButtons(); // Initialize delete button event listeners after adding them
+                            initApprovalRejectionButtons(); // Initialize the new buttons
                         } else {
-                            ticketTableBody.append('<tr><td colspan="7" class="text-center">No tickets found.</td></tr>');
+                            ticketTableBody.append('<tr><td colspan="5" class="text-center">No tickets found.</td></tr>'); // Changed colspan
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error("Error loading tickets:", status, error);
                         toastr.error("Failed to load tickets. Please check the server and try again.", "Error");
-                        $("#ticketTable tbody").html('<tr><td colspan="7" class="text-center text-danger">Failed to load tickets.</td></tr>');
+                        $("#ticketTable tbody").html('<tr><td colspan="5" class="text-center text-danger">Failed to load tickets.</td></tr>'); // Changed colspan
                     }
                 });
-            } 
+            }
             
-            function initDeleteButtons() {
-                $('.delete-button').on('click', function() {
+            function initApprovalRejectionButtons() {
+                $('.approve-button').on('click', function() {
                     var ticketId = $(this).data('ticket-id');
-                    var ticketTitle = $(this).data('ticket-title');
-                    $('#deleteTicketTitle').text(ticketTitle);
-                    var deleteUrl = "http://localhost:8383/api/tickets/users/delete/" + ticketId;
-                    $('#deleteConfirmButton').attr("href", deleteUrl); // Set the href dynamically
+                    //  Add logic here to send an API request to approve the ticket.
+                    console.log("Approve button clicked for ticket ID:", ticketId);
+                    //  Example AJAX call (adjust the URL and method as needed):
+                    $.ajax({
+                        url: "http://localhost:8383/api/tickets/approve/" + ticketId, //  Correct URL
+                        type: "PUT", //  Correct HTTP method (usually PUT or PATCH for updates)
+                        success: function(response) {
+                            toastr.success("Ticket approved successfully!");
+                            loadTickets(); // Reload the ticket list to reflect the change
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error approving ticket:", status, error);
+                            toastr.error("Failed to approve ticket. Please try again.", "Error");
+                        }
+                    });
+                });
+
+                $('.reject-button').on('click', function() {
+                    var ticketId = $(this).data('ticket-id');
+                    //  Add logic here to send an API request to reject the ticket.
+                    console.log("Reject button clicked for ticket ID:", ticketId);
+                     $.ajax({
+                        url: "http://localhost:8383/api/tickets/reject/" + ticketId,  // Correct URL
+                        type: "PUT", // Correct HTTP method
+                        success: function(response) {
+                            toastr.success("Ticket rejected successfully!");
+                             loadTickets();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error rejecting ticket:", status, error);
+                            toastr.error("Failed to reject ticket. Please try again.", "Error");
+                        }
+                    });
                 });
             }
 

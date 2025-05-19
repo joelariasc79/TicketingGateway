@@ -5,6 +5,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.ticketing.model.DepartmentResponse;
 import com.ticketing.model.ProjectResponse;
+import com.ticketing.model.RoleResponse;
 import com.ticketing.model.UserResponse;
 
 import org.springframework.http.HttpHeaders;
@@ -167,7 +168,8 @@ public class ExternalServiceClient {
     
      HttpHeaders headers = new HttpHeaders();
      HttpEntity<Void> requestEntity = new HttpEntity<>(headers); // No body for GET
-
+     
+     System.out.println("url: "  +url + userName);
 
       try {
     	  ResponseEntity<UserResponse> responseEntity = restTemplate.exchange(
@@ -206,6 +208,52 @@ public class ExternalServiceClient {
          
 
      return user;
+ }
+ 
+ 
+ public List<RoleResponse> fethcRolesByUser(HttpClient client, String url, Long userId) {    	
+	 List<RoleResponse> roles = new ArrayList<>();
+    
+     HttpHeaders headers = new HttpHeaders();
+     HttpEntity<Void> requestEntity = new HttpEntity<>(headers); // No body for GET
+
+      try {
+    	  ResponseEntity<List<RoleResponse>> responseEntity = restTemplate.exchange(
+    			    url + "{userId}", // Append query parameters to the URL
+    			    HttpMethod.GET,
+    			    requestEntity,
+    			    new ParameterizedTypeReference<List<RoleResponse>>() {},
+    			    userId
+    			);
+
+	         
+	         if (responseEntity.getStatusCode().is2xxSuccessful()) {
+	        	 roles = responseEntity.getBody();
+	             // Process the list of users
+	             System.out.println("Users: " + roles);
+	         } else {
+	             System.err.println("GET Request failed with status code: " + responseEntity.getStatusCode());
+	         }
+      } catch (HttpClientErrorException e) {
+     	    System.err.println("Client error during GET request. Status Code: " + e.getStatusCode());
+     	    System.err.println("Response Body: " + e.getResponseBodyAsString());
+     	    // Handle specific client errors (4xx)
+     	    if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+     	        System.err.println("Resource not found at: " + url);
+     	    } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+     	        System.err.println("Unauthorized access to: " + url);
+     	    }
+     	    // Add more specific error handling based on status codes
+     	} catch (RestClientException e) {
+     	    System.err.println("Error during GET request: " + e.getMessage());
+     	    // Handle other RestTemplate related exceptions (e.g., connection issues)
+     	} catch (Exception e) {
+     	    System.err.println("An unexpected error occurred during the GET request: " + e.getMessage());
+     	    // Handle any other unexpected exceptions
+     	}
+         
+
+     return roles;
  }
  
 
