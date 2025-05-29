@@ -1,4 +1,4 @@
-package com.ticketing.controller;
+package com.ticketing.controller.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @Controller
-@RequestMapping("/admin/users/resetPassword")
+@RequestMapping("/ticketingGateway/admin/users/resetPassword")
 @SessionAttributes("user")
 public class ResetPasswordController {
 	
@@ -32,20 +32,6 @@ public class ResetPasswordController {
     public ResetPasswordController(ExternalServiceClient externalServiceClient) {
         this.externalServiceClient = externalServiceClient;
     }
-    
-   
- // This method handles redirects with errors from the backend
-    @GetMapping()
-    public String resetPasswordFormWithError(@org.springframework.web.bind.annotation.RequestParam(value = "id", required = false) Long userId,
-                                             @org.springframework.web.bind.annotation.RequestParam(value = "error", required = false) String error,
-                                             Model model) {
-        model.addAttribute("userId", userId);
-        if (error != null) {
-            model.addAttribute("error", error);
-        }
-        return "resetPassword/resetPassword";
-    }
-    
     
     @GetMapping("/find")
     public String showFindUsersForm(Model model) {
@@ -63,6 +49,19 @@ public class ResetPasswordController {
         model.addAttribute("projects", projects);
 
         return "resetPassword/findUser";
+    }
+    
+   
+ // This method handles redirects with errors from the backend
+    @GetMapping()
+    public String resetPasswordFormWithError(@org.springframework.web.bind.annotation.RequestParam(value = "id", required = false) Long userId,
+                                             @org.springframework.web.bind.annotation.RequestParam(value = "error", required = false) String error,
+                                             Model model) {
+        model.addAttribute("userId", userId);
+        if (error != null) {
+            model.addAttribute("error", error);
+        }
+        return "resetPassword/resetPassword";
     }
     
 

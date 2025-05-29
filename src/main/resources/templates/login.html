@@ -41,11 +41,7 @@
         </div>
         <div>
             <span class="text-muted">Forgot your password? </span>
-            <a th:href="@{/admin/users/resetPassword/find}">Reset Here!</a>
-        </div>
-        <div>
-            <span class="text-muted">Don't Have an Account? </span>
-             <a th:href="@{/admin/users/create}">Create Here!</a>
+            <a th:href="@{/ticketingGateway/admin/users/resetPassword/find}">Reset Here!</a>
         </div>
          <input class="btn btn-primary mt-5" type="submit" value="Submit" />
          <input type="hidden" name="_csrf" value="${_csrf.token}" />

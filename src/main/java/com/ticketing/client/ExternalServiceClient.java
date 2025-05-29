@@ -256,5 +256,46 @@ public class ExternalServiceClient {
      return roles;
  }
  
+ public UserResponse fetchUserById(String url, Long userId) {
+	 System.out.println("Fetching user by ID from URL: " + url + userId);
+     UserResponse user = null; // Initialize to null
+     HttpHeaders headers = new HttpHeaders();
+     HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+     System.out.println("Fetching user by ID from URL: " + url + userId);
+
+     try {
+         ResponseEntity<UserResponse> responseEntity = restTemplate.exchange(
+             url + "{userId}", // The endpoint URL with a path variable
+             HttpMethod.GET,
+             requestEntity,
+             new ParameterizedTypeReference<UserResponse>() {},
+             userId // The value for the path variable
+         );
+
+         if (responseEntity.getStatusCode().is2xxSuccessful()) {
+             user = responseEntity.getBody();
+             System.out.println("Successfully fetched User by ID: " + user);
+         } else {
+             System.err.println("GET Request failed for user by ID with status code: " + responseEntity.getStatusCode());
+         }
+     } catch (HttpClientErrorException e) {
+         System.err.println("Client error fetching user by ID. Status Code: " + e.getStatusCode());
+         System.err.println("Response Body: " + e.getResponseBodyAsString());
+         if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+             System.err.println("User resource not found at: " + url + userId);
+             // You might choose to re-throw a specific exception here if needed
+         }
+         throw e; // Re-throw to propagate error to the calling method
+     } catch (RestClientException e) {
+         System.err.println("Error during GET request for user by ID: " + e.getMessage());
+         throw e; // Re-throw
+     } catch (Exception e) {
+         System.err.println("An unexpected error occurred during GET request for user by ID: " + e.getMessage());
+         throw e; // Re-throw
+     }
+     return user;
+ }
+ 
 
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.ticketing.domain.User;
 
-public class UserResponse {
+public class UserResponseLongs {
     private Long userId;
     private String userName;
     private String password;
@@ -16,11 +16,11 @@ public class UserResponse {
     private Long manager; 
 
     // Default constructor
-    public UserResponse() {
+    public UserResponseLongs() {
     }
 
     // Constructor with all fields
-    public UserResponse(Long userId, String userName, String password, String email, List<Long> managedUsers, 
+    public UserResponseLongs(Long userId, String userName, String password, String email, List<Long> managedUsers, 
     		List<Long> roles, Long project, Long department, Long manager) {
         this.userId = userId;
         this.userName = userName;
@@ -34,7 +34,7 @@ public class UserResponse {
     }
     
     
-    public UserResponse(Long userId, String userName, String email, String password, Long manager, Long department, 
+    public UserResponseLongs(Long userId, String userName, String email, String password, Long manager, Long department, 
     		Long project, List<Long> roles) {
         this.userId = userId;
         this.userName = userName;

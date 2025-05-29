@@ -4,24 +4,25 @@ import java.util.List;
 
 import com.ticketing.domain.User;
 
-public class UserResponse {
+public class UserResponseRefactors {
     private Long userId;
     private String userName;
+//    private String userPassword;
     private String password;
     private String email;
-    private List<Long> managedUsers;
-    private List<Long> roles;
-    private Long project;
-    private Long department;
-    private Long manager; 
+    private List<UserResponse> managedUsers;
+    private List<RoleResponse> roles;
+    private ProjectResponse project;
+    private DepartmentResponse department;
+    private UserResponse manager; 
 
     // Default constructor
-    public UserResponse() {
+    public UserResponseRefactors() {
     }
 
     // Constructor with all fields
-    public UserResponse(Long userId, String userName, String password, String email, List<Long> managedUsers, 
-    		List<Long> roles, Long project, Long department, Long manager) {
+    public UserResponseRefactors(Long userId, String userName, String password, String email, List<UserResponse> managedUsers, 
+    		List<RoleResponse> roles, ProjectResponse project, DepartmentResponse department, UserResponse manager) {
         this.userId = userId;
         this.userName = userName;
         this.password = password;
@@ -33,9 +34,9 @@ public class UserResponse {
         this.manager = manager;
     }
     
-    
-    public UserResponse(Long userId, String userName, String email, String password, Long manager, Long department, 
-    		Long project, List<Long> roles) {
+    public UserResponseRefactors(Long userId, String userName, String email, String password, UserResponse manager, 
+    		DepartmentResponse department, 
+    		ProjectResponse project, List<RoleResponse> roles) {
         this.userId = userId;
         this.userName = userName;
         this.password = password;
@@ -55,7 +56,11 @@ public class UserResponse {
         return userName;
     }
 
-    public String getPassword() {
+//    public String getUserPassword() {
+//        return userPassword;
+//    }
+    
+    public String getpassword() {
         return password;
     }
 
@@ -63,19 +68,19 @@ public class UserResponse {
         return email;
     }
 
-    public List<Long> getManagedUsers() {
+    public List<UserResponse> getManagedUsers() {
         return managedUsers;
     }
 
-    public List<Long> getRoles() {
+    public List<RoleResponse> getRoles() {
         return roles;
     }
 
-    public Long getProject() {
+    public ProjectResponse getProject() {
         return project;
     }
 
-    public Long getDepartment() {
+    public DepartmentResponse getDepartment() {
         return department;
     }
 
@@ -88,6 +93,10 @@ public class UserResponse {
         this.userName = userName;
     }
 
+//    public void setUserPassword(String userPassword) {
+//        this.userPassword = userPassword;
+//    }
+    
     public void setPassword(String password) {
         this.password = password;
     }
@@ -96,27 +105,27 @@ public class UserResponse {
         this.email = email;
     }
 
-    public void setManagedUsers(List<Long> managedUsers) {
+    public void setManagedUsers(List<UserResponse> managedUsers) {
         this.managedUsers = managedUsers;
     }
 
-    public void setRoles(List<Long> roles) {
+    public void setRoles(List<RoleResponse> roles) {
         this.roles = roles;
     }
 
-    public void setProject(Long project) {
+    public void setProject(ProjectResponse project) {
         this.project = project;
     }
 
-    public void setDepartment(Long department) {
+    public void setDepartment(DepartmentResponse department) {
         this.department = department;
     }
     
-    public Long getManager() {
+    public UserResponse getManager() {
         return manager;
     }
 
-    public void setManager(Long manager) {
+    public void setManager(UserResponse manager) {
         this.manager = manager;
     }
 
@@ -134,4 +143,19 @@ public class UserResponse {
                 ", manager=" + manager +
                 '}';
     }
+    
+//    @Override
+//    public String toString() {
+//        return "UserResponse{" +
+//                "userId=" + userId +
+//                ", userName='" + userName + '\'' +
+//                ", userPassword='" + userPassword + '\'' +
+//                ", email='" + email + '\'' +
+//                ", managedUsers=" + managedUsers +
+//                ", roles=" + roles +
+//                ", project=" + project +
+//                ", department=" + department +
+//                ", manager=" + manager +
+//                '}';
+//    }
 }

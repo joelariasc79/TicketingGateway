@@ -73,7 +73,18 @@
             <div class="col-md-8">
                 <div class="card shadow-lg">
                     <div class="card-header">
-                        <h3 class="card-title" th:text="${userFormTitle}"></h3>
+                        <!-- <h3 class="card-title" th:text="${userFormTitle}"></h3> -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+						<h1 th:text=${userFormTitle}></h1>
+						<form th:action="@{/logout}" method="post" class="logout-form">
+							<div th:if="${_csrf}">
+						    	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+						    </div>
+						    <button type="submit" class="btn btn-danger">Logout</button>
+						</form>
+					</div>
+                        
+                        
                         <p><b>User ID: </b><span th:text="${userId}"></span></p>
                         <p><b>Ticket ID: </b><span th:text="${ticketId}"></span></p>
                     </div>
@@ -126,10 +137,12 @@
                                 <ul id="existingAttachmentsList" class="list-unstyled">
                                     </ul>
                             </div>
-                            <button type="button" id="submitTicketBtn" class="btn btn-primary me-2" th:text="${ticketId == null ? 'Create Ticket' : 'Update Ticket'}"></button>
                             <button type="button" id="sendTicketBtn" class="btn btn-success me-2">Send</button> 
+                            <button type="button" id="submitTicketBtn" class="btn btn-primary me-2" th:text="${ticketId == null ? 'Create Ticket' : 'Update Ticket'}"></button>
                             <button type="reset" class="btn btn-secondary">Clear</button>
-        					<a th:href="@{/ticketing/userTicketsList/{userId}(userId=${userId})}" class="btn btn-secondary">Go Back</a>
+        					<div>
+					            <a th:href="@{/ticketingGateway/users/{userId}/ticketsList(userId=${userId})}" class="btn btn-secondary mt-3">Go Back</a>
+					        </div>
                         </form>
                     </div>
                 </div>
@@ -165,11 +178,6 @@
 		        submitTicketForm(); // Call the submit function
 		    });
 		
-		    /* $('#sendTicketBtn').click(function(e) { // Added click listener for Send button
-		        e.preventDefault();
-		        submitTicketForm('SEND'); // Call the submit function with an action
-		    }); */
-		
 		    function submitTicketForm(action) { // Modified submit function to accept an action
 		        let url = 'http://localhost:8383';
 		
@@ -194,7 +202,7 @@
 		                if (response.success) {
 		                    toastr.success(response.message, 'Success');
 		                    $('#ticketForm')[0].reset();
-		                    window.location.href = '/ticketing/userTicketsList/' + userId;
+		                    window.location.href = '/ticketingGateway/users/' + userId + '/ticketsList';
 		                } else {
 		                    $.each(response.errors, function(key, value) {
 		                        $('#' + key).addClass('is-invalid');
@@ -230,7 +238,7 @@
 		                if (response.success) {
 		                    toastr.success(response.message, 'Success');
 		                    $('#ticketForm')[0].reset();
-		                    window.location.href = '/ticketing/userTicketsList/' + userId;
+		                    window.location.href = '/ticketingGateway/users/' + userId + '/ticketsList';
 		                } else {
 		                    $.each(response.errors, function(key, value) {
 		                        $('#' + key).addClass('is-invalid');
@@ -259,13 +267,12 @@
 		                        $('#description').val(ticket.description);
 		                        $('#priority').val(ticket.priority);
 		                        $('#category').val(ticket.category);
-		                        $('#comments').val(ticket.comments);
+		                        $('#comments').val(ticket.latestComment);
 		
 		                        //set priority dropdown
 		                        if(ticket.priority){
 		                           $('#priority').val(ticket.priority);
 		                        }
-		
 		
 		                        // Load existing attachments
 		                        if (ticket.attachments && ticket.attachments.length > 0) {

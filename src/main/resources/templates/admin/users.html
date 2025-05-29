@@ -13,13 +13,29 @@
         .action-buttons a {
             margin-right: 5px;
         }
+        /* Style for required field indicator (example for forms) */
+        .form-group.required .control-label:after {
+            content:"*";
+            color:red;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 th:text="${formHeading}" class="mb-4"></h1>
-        <p><a href="/admin/users/create" class="btn btn-success">Create New User</a></p>
-        <p><a href="/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p>
+    
+    	<div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 th:text="${formHeading}"></h1>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <div th:if="${_csrf}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                </div>
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+        
+        <p><a href="/ticketingGateway/admin/users/create" class="btn btn-success">Create New User</a></p>
+        <p><a href="/ticketingGateway/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p>
 
         <div id="message-container">
             <div th:if="${message}" class="alert alert-info" th:text="${message}"></div>
@@ -42,18 +58,64 @@
                     <td th:text="${user.userName}"></td>
                     <td th:text="${user.email}"></td>
                     <td>
-                        <span th:each="role : ${user.roles}" class="badge badge-secondary" th:text="${role.roleName}"></span>
+                        <span th:each="role : ${user.roles}" class="badge badge-secondary mr-1" th:text="${role.roleName}"></span>
                     </td>
-                    
+
                     <td class="action-buttons">
-                        <a th:href="@{/admin/users/edit/{userId}(userId=${user.userId})}" class="btn btn-sm btn-primary">Edit</a>
-                        <a th:href="@{/admin/users/delete/{userId}(userId=${user.userId})}" class="btn btn-sm btn-danger">Delete</a>
+                        <a th:href="@{/ticketingGateway/admin/users/{userId}/edit(userId=${user.userId})}" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="#" class="btn btn-sm btn-danger delete-user-btn"
+                           th:data-user-id="${user.userId}"
+                           th:data-username="${user.userName}"
+                           data-toggle="modal" data-target="#deleteConfirmationModal">Delete</a>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete user "<strong id="modal-username"></strong>" (ID: <strong id="modal-userid"></strong>)?
+                    This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a href="#" id="confirmDeleteButton" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    </body>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Script for Delete Confirmation Modal
+            $('#deleteConfirmationModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget); // Button that triggered the modal
+                var userId = button.data('user-id'); // Extract info from data-* attributes
+                var username = button.data('username');
+
+                var modal = $(this);
+                modal.find('#modal-userid').text(userId);
+                modal.find('#modal-username').text(username);
+
+                // Update the form action or button href in the modal
+                var confirmButton = modal.find('#confirmDeleteButton');
+                // Set the href of the confirm delete button to the actual delete endpoint
+                confirmButton.attr('href', '/ticketingGateway/admin/users/' + userId + '/delete');
+            });
+        });
+    </script>
+</body>
 </html>

@@ -29,6 +29,189 @@
 <body>
     <div class="container mt-5">
         <h1>Find Users by Department and Project</h1>
+        <div id="ajaxError" class="alert alert-danger" style="display:none;"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+
+        <!-- <form th:action="@{/admin/users/resetPassword/filter}" method="get" class="mb-4"> -->
+        <form id="findUsersForm" class="mb-4">
+            <div class="form-group">
+                <label for="department">Department:</label>
+                <select class="form-control" id="departmentId" name="departmentId">
+                    <option value="">Loading Departments...</option>
+                    </select>
+            </div>
+
+            <div class="form-group">
+                <label for="project">Project:</label>
+                <select class="form-control" id="projectId" name="projectId">
+                    <option value="">Loading Projects...</option>
+                    </select>
+            </div>
+
+            <button type="button" id="findUsers" class="btn btn-primary">Find Users</button> 
+        </form>
+    
+	    <div id="userListContainer" class="user-list">
+		    <h2>Users Found:</h2>
+		    <div id="usersResult">
+		        <p>Select criteria and click 'Find Users' to see results.</p> 
+		    </div>
+		</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const departmentApiUrl = 'http://localhost:8282/api/admin/departments/all';
+            const projectApiUrl = 'http://localhost:8282/api/admin/projects/all';
+            const filterUsersApiUrl = 'http://localhost:8282/api/v1/admin/users/resetPassword/filter';
+            
+            const departmentSelect = $('#departmentId');
+            const projectSelect = $('#projectId');
+            const usersResultDiv = $('#usersResult');
+            const ajaxErrorDiv = $('#ajaxError');
+
+            // Function to load and populate Departments
+            function loadDepartments() {
+                $.ajax({
+                    url: departmentApiUrl,
+                    method: 'GET',
+                    success: function(departments) {
+                        departmentSelect.empty().append('<option value="">Select Department</option>'); // Clear existing options
+                        if (departments && departments.length > 0) {
+                            $.each(departments, function(index, dept) {
+                                departmentSelect.append($('<option>', {
+                                    value: dept.departmentId,
+                                    text: dept.departmentName
+                                }));
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading departments:", status, error);
+                        departmentSelect.empty().append('<option value="">Error loading departments</option>');
+                    }
+                });
+            }
+
+            // Function to load and populate Projects
+            function loadProjects() {
+                $.ajax({
+                    url: projectApiUrl,
+                    method: 'GET',
+                    success: function(projects) {
+                        projectSelect.empty().append('<option value="">Select Project</option>'); // Clear existing options
+                        if (projects && projects.length > 0) {
+                            $.each(projects, function(index, proj) {
+                                projectSelect.append($('<option>', {
+                                    value: proj.projectId,
+                                    text: proj.projectName
+                                }));
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading projects:", status, error);
+                        projectSelect.empty().append('<option value="">Error loading projects</option>');
+                    }
+                });
+            }
+            
+         	// Function to load and display users based on filters
+            function loadUsers(departmentId, projectId) {
+                ajaxErrorDiv.hide(); // Hide any previous errors
+                usersResultDiv.empty().html('<p>Loading users...</p>'); // Show loading indicator
+
+                $.ajax({
+                    url: filterUsersApiUrl,
+                    method: 'GET',
+                    data: {
+                        departmentId: departmentId,
+                        projectId: projectId
+                    },
+                    success: function(users) {
+                        usersResultDiv.empty(); // Clear loading indicator
+
+                        if (users && users.length > 0) {
+                            $.each(users, function(index, user) {
+                                // Construct the reset password URL dynamically
+                                // Assuming the base URL is consistent with the Thymeleaf context
+                                const resetPasswordUrl = `/ticketingGateway/admin/users/resetPassword/${user.userId}`;
+
+                                usersResultDiv.append(
+                                    `<div class="user-item">
+                                        <div>
+                                            <span>${user.userName}</span> (<span>${user.email}</span>)
+                                        </div>
+                                        <div>
+                                            <a href="${resetPasswordUrl}" class="btn btn-sm btn-warning">Reset Password</a>
+                                        </div>
+                                    </div>`
+                                );
+                            });
+                        } else {
+                            usersResultDiv.html('<p>No users found matching the criteria.</p>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading users:", status, error);
+                        usersResultDiv.empty(); // Clear loading indicator
+                        ajaxErrorDiv.text("Failed to load users: " + (xhr.responseJSON ? xhr.responseJSON.message : error)).show();
+                    }
+                });
+            }
+         	
+            $('#findUsers').click(function(e) { // Changed selector to the button ID
+		        e.preventDefault();
+
+                const selectedDepartmentId = departmentSelect.val();
+                const selectedProjectId = projectSelect.val();
+                
+                loadUsers(selectedDepartmentId, selectedProjectId)
+		    })
+         	
+            // Call the functions when the document is ready
+            loadDepartments();
+            loadProjects();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Find Users</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+    <style>
+        .error-message {
+            color: red;
+        }
+        .user-list {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .user-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex; /* Use flexbox to align user info and the link */
+            justify-content: space-between; /* Put space between the info and the link */
+            align-items: center; /* Vertically align items in the center */
+        }
+        .user-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Find Users by Department and Project</h1>
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
         <form th:action="@{/admin/users/resetPassword/filter}" method="get" class="mb-4">
@@ -65,4 +248,4 @@
         </div>
     </div>
 </body>
-</html>
+</html> -->

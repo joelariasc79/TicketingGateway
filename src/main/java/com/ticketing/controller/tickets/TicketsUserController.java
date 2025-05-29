@@ -1,4 +1,4 @@
-package com.ticketing.controller;
+package com.ticketing.controller.tickets;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/ticketing") // Added a base path for the controller
-public class TicketsController {
+@RequestMapping("/ticketingGateway/users") // Added a base path for the controller
+public class TicketsUserController {
 
-    @GetMapping("/userTicketsList/{userId}")
+    @GetMapping("/{userId}/ticketsList")
     public String getUserTickets(@PathVariable Long userId, Model model) {
         model.addAttribute("userId", userId);
         return "ticketing/userTicketsList"; //  Return the name of your Thymeleaf template.
     }
       
-    @GetMapping("/users/create/{userId}")
+    @GetMapping("/{userId}/create")
     public String createForm(@PathVariable Long userId, Model model) {
         model.addAttribute("formHeading", "Create New Ticket");
         model.addAttribute("userFormTitle", "Create New Ticket");
@@ -24,7 +24,7 @@ public class TicketsController {
         return "ticketing/userTicket"; // Returns the same Thymeleaf template for create
     }
     
-    @GetMapping("/users/update/{userId}/{ticketId}")
+    @GetMapping("/{userId}/tickets/{ticketId}/edit")
     public String updAateForm(@PathVariable Long userId, @PathVariable Long ticketId, Model model) {
         model.addAttribute("formHeading", "Update Ticket");
         model.addAttribute("userFormTitle", "UpdateTicket");
@@ -33,11 +33,5 @@ public class TicketsController {
         return "ticketing/userTicket"; // Returns the same Thymeleaf template for create
     }
     
-    
-    @GetMapping("/managerTicketsList/{userId}")
-    public String getManagerTickets(@PathVariable Long userId, Model model) {
-        model.addAttribute("userId", userId);
-        return "ticketing/managerTicketsList"; //  Return the name of your Thymeleaf template.
-    }
 }
 

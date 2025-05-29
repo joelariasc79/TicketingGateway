@@ -18,11 +18,21 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 th:text="${formHeading}" class="mb-4"></h1>
+    	<div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 th:text="${formHeading}"></h1>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <div th:if="${_csrf}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                </div>
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
         <form id="userForm">
+            
             <input type="hidden" id="userId" name="id" th:value="${userId}">
 
             <div class="mb-3">
@@ -79,11 +89,11 @@
                 </div>
 
             <button type="button" id="saveUserButton" class="btn btn-primary">Save User</button>
-            <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+            <a href="/ticketingGateway/admin/users" class="btn btn-secondary">Cancel</a>
 
             <p id="errorMessage" class="error-message"></p>
             <p id="successMessage" class="success-message"></p>
-            <p class="mt-3"><a href="/admin/users">Back to User List</a></p>
+            <p class="mt-3"><a href="/ticketingGateway/admin/users">Back to User List</a></p>
         </form>
     </div>
     <script th:inline="javascript">
@@ -175,18 +185,24 @@
 
             function loadAvailableRoles(userRoles) {
             	let url = 'http://localhost:8282';
-            	url += '/api/admin/projects/all';
+            	url += '/api/admin/roles/all';
                 $.ajax({
-                    url: '/admin/roles/all',
+                    url: url,
                     type: 'GET',
                     dataType: 'json',
+                 // Inside your success function for loadAvailableRoles
                     success: function(roles) {
                         const container = $('#available-roles-container');
                         container.empty();
                         allRoles = roles;
-                        $.each(roles, function(i, role) {
+                        // Assuming userRoles is now just a List<Long> (e.g., [1, 2, 3])
+                        const userRoleIds = userRoles; // Directly use userRoles as it's already a list of IDs
+
+                        $.each(roles, function(i, role) { // 'roles' here are the full role objects from /api/admin/roles/all
                             const checkboxId = 'availableRole_' + role.roleId;
-                            const isChecked = userRoles.some(userRole => userRole.roleId === role.roleId);
+                            // Check if the current role.roleId exists in the userRoleIds list
+                            const isChecked = userRoleIds.includes(role.roleId); // Use .includes() for simple ID check
+
                             const checkbox = `<div class="form-check"><input type="checkbox" class="form-check-input" name="roles" value="${role.roleId}" id="${checkboxId}" ${isChecked ? 'checked' : ''}><label class="form-check-label" for="${checkboxId}">${role.roleName}</label></div>`;
                             container.append(checkbox);
                         });
@@ -233,7 +249,7 @@
             }
 
             $('#saveUserButton').click(function(event) {
-                event.preventDefault();
+                /* event.preventDefault(); */
 
                 const selectedRoles = $('input[name="roles"]:checked').map(function(){
                     return parseInt($(this).val());
@@ -314,7 +330,7 @@
                     success: function(response) {
                         $('#successMessage').text(response.message || 'User saved successfully.');
                         $('#errorMessage').empty();
-                        window.location.href = '/admin/users';
+                        window.location.href = '/ticketingGateway/admin/users';
                     },
                     error: function(error) {
                         $('#errorMessage').text(error.responseJSON?.message || 'Error saving user.');

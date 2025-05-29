@@ -1,4 +1,4 @@
-package com.ticketing.controller;
+package com.ticketing.controller.admin;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

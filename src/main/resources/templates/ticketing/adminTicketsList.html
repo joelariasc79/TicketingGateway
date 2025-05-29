@@ -24,17 +24,18 @@
 </head>
 <body>
     <div class="container mt-5">
+        
         <div class="d-flex justify-content-between align-items-center mb-3">
-			<!-- <h1 th:text="${formHeading}"></h1> -->
-			<h1>Ticket List</h1>
-			<form th:action="@{/logout}" method="post" class="logout-form">
-				<div th:if="${_csrf}">
-					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-				</div>
-			<button type="submit" class="btn btn-danger">Logout</button>
-			</form>
-		</div>
-		
+            <!-- <h1 th:text="${formHeading}"></h1> -->
+            <h1>Ticket List</h1>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <div th:if="${_csrf}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                </div>
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+        
         <p><b>User ID: </b><span th:text="${userId}"></span></p>
         <div>
             <p><a href="/ticketingGateway/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p>
@@ -45,8 +46,8 @@
                     <th>Title</th>
                     <th>Description</th>
                     <th>Priority</th>
+                    <th>Assignee</th> 
                     <th>Edit</th>
-                    <th>View History</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,7 +58,7 @@
         </table>
 
         <div>
-            <p><a href="/ticketingGateway/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p>
+            <p><a href="/ticketingGateway/admin/users/dashboard" class="btn btn-secondary">Go Back</a></p> 
         </div>
     </div>
 
@@ -67,7 +68,7 @@
     <script th:inline="javascript">
         $(document).ready(function() {
         	let userId = /*[[${userId}]]*/ null;
-            var ticketApiUrl = "http://localhost:8383/api/tickets/managers/" + userId + "/managedTickets";
+            var ticketApiUrl = "http://localhost:8383/api/tickets/admin/" + userId;
             
             console.log("userId: " + userId);
            
@@ -79,33 +80,32 @@
                     success: function(data) {
                         var ticketTableBody = $("#ticketTable tbody");
                         ticketTableBody.empty();
-                                          
                         if (data && data.length > 0) {
                             $.each(data, function(index, ticket) {
-                            	var viewHistoryButtonHtml = '<a href="/ticketingGateway/viewHistory/' + userId + '/ticket/' + ticket.ticketId + '?prev=' + encodeURIComponent(window.location.href) + '" class="btn btn-success btn-sm">View History</a>';
-                            	var editButtonHtml = '<a href="/ticketingGateway/managers/' + userId + '/tickets/' + ticket.ticketId + '/edit" class="btn btn-primary btn-sm">Edit</a>';
+                            	var editButtonHtml = '<a href="/ticketingGateway/admin/' + userId + '/tickets/' + ticket.ticketId + '/edit" class="btn btn-primary btn-sm">Edit</a>';
                             	
+                                var assigneeName = ticket.assignee ? ticket.assignee.name : 'Unassigned'; // Get assignee name or set default
                                 var row = '<tr>' +
                                     '<td>' + ticket.title + '</td>' +
                                     '<td>' + ticket.description + '</td>' +
                                     '<td>' + ticket.priority + '</td>' +
+                                    '<td>' + assigneeName + '</td>' + // Display Assignee Name
                                     '<td>' + editButtonHtml + '</td>' +
-                                    '<td>' + viewHistoryButtonHtml + '</td>' +
                                     '</tr>';
                                 ticketTableBody.append(row);
                             });
                         } else {
-                            ticketTableBody.append('<tr><td colspan="5" class="text-center">No tickets found.</td></tr>'); // Changed colspan
+                            ticketTableBody.append('<tr><td colspan="5" class="text-center">No tickets found.</td></tr>'); // Changed colspan to 5
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error("Error loading tickets:", status, error);
                         toastr.error("Failed to load tickets. Please check the server and try again.", "Error");
-                        $("#ticketTable tbody").html('<tr><td colspan="5" class="text-center text-danger">Failed to load tickets.</td></tr>'); // Changed colspan
+                        $("#ticketTable tbody").html('<tr><td colspan="5" class="text-center text-danger">Failed to load tickets.</td></tr>'); // Changed colspan to 5
                     }
                 });
             }
-            
+
             loadTickets();
         });
     </script>
